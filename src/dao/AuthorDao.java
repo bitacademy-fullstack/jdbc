@@ -54,6 +54,7 @@ public class AuthorDao {
 			System.out.println( "error:" + e );
 			return false;
 		} finally {
+			
 			/* 자원정리 */
 			try {
 				if( pstmt != null ) {
@@ -123,7 +124,56 @@ public class AuthorDao {
 	}
 	
 	public AuthorVo get( Long no ) {
-		return null;
+
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		AuthorVo authorVo  = null;
+		
+		try {
+			conn = getConnection();
+			
+			//3. Statement 준비
+			String sql = "select  no, name, bio from author where no = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			//4. 바인딩
+			pstmt.setLong( 1, no );
+			
+			//5. sql문 실행
+			rs = pstmt.executeQuery();
+			
+			//5. fetch row( row를 하나씩 가져오기)
+			if( rs.next() ){
+				authorVo = new AuthorVo();
+
+				authorVo.setNo( rs.getLong( 1 ) );
+				authorVo.setName( rs.getString( 2 ) );
+				authorVo.setBio( rs.getString( 3 ) );
+			}
+
+			return authorVo;
+			
+		} catch ( SQLException e ) {
+			System.out.println( "error:" + e );
+			return authorVo;
+		} finally {
+			/* 자원정리 */
+			try {
+				if( rs != null ) {
+					rs.close();
+				}
+				if( pstmt != null ) {
+					pstmt.close();
+				}
+				if(conn != null ) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public AuthorVo get( String name ) {
@@ -131,10 +181,78 @@ public class AuthorDao {
 	}
 	
 	public boolean delete( Long no ) {
-		return false;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+
+		try {
+			conn = getConnection();
+			
+			//3. Statement 준비
+			String sql =	"delete from author where no = ?";
+			pstmt = conn.prepareStatement( sql );
+			
+			//4. 바인딩
+			pstmt.setLong( 1, no );
+			
+			//5. sql문 실행
+			int count = pstmt.executeUpdate();
+			return (count == 1);
+			
+		} catch ( SQLException e ) {
+			System.out.println( "error:" + e );
+			return false;
+		} finally {
+			
+			/* 자원정리 */
+			try {
+				if( pstmt != null ) {
+					pstmt.close();
+				}
+				if(conn != null ) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public boolean update( AuthorVo authorVo ) {
-		return false;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+
+		try {
+			conn = getConnection();
+			
+			//3. Statement 준비
+			String sql =	"update author set name=?, bio = ? where no = ?";
+			pstmt = conn.prepareStatement( sql );
+			
+			//4. 바인딩
+			pstmt.setString( 1, authorVo.getName() );
+			pstmt.setString( 2, authorVo.getBio() );
+			pstmt.setLong( 3, authorVo.getNo() );
+			
+			//5. sql문 실행
+			int count = pstmt.executeUpdate();
+			return (count == 1);
+			
+		} catch ( SQLException e ) {
+			System.out.println( "error:" + e );
+			return false;
+		} finally {
+			
+			/* 자원정리 */
+			try {
+				if( pstmt != null ) {
+					pstmt.close();
+				}
+				if(conn != null ) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
